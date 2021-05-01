@@ -122,19 +122,23 @@ public class Proj3 {
         }
 
         while (hmPickedJobs.size() > 0) {
-
+            // get smallest job duration and assign to string
             int minValueInMap = (Collections.min(hmPickedJobs.values()));
             for (Map.Entry<String, Integer> entry : hmPickedJobs.entrySet()) {
                 if (entry.getValue() == minValueInMap) {
                     minJob = entry.getKey();
-                    // Print the key with min value
                 }
             }
+            // put job and start time of min job in the hashmap
             hmStartTime.put(minJob, startTime);
+            // set finish time to start time + picked job's duration value
             finishTime = startTime + hmPickedJobs.get(minJob);
+            // set start time of now new job to finish time of last job
             startTime = finishTime;
+            // remove the min duration job from picked jobs
             hmPickedJobs.remove(minJob);
         }
+        // Print out SPN
         System.out.println("\nSPN :\n");
         for (int i = 0; i < arrJobs.size(); i++) {
             printProcess(arrJobs.get(i), hmStartTime.get(arrJobs.get(i)),
@@ -144,8 +148,7 @@ public class Proj3 {
     }
 
     public static void hrrn() {
-        HashMap<String, Integer> hmDuration = new HashMap<String, Integer>(); // Hash map for storing duration in form
-        // of {Job : duration}
+        HashMap<String, Integer> hmDuration = new HashMap<String, Integer>();
         HashMap<String, Integer> hmStartTime = new HashMap<String, Integer>(); // Hash map for storing start time in
         // form of {Job : start time}
         HashMap<String, Integer> hmPickedJobs = new HashMap<String, Integer>(); // Hash map for storing duration in form
@@ -154,7 +157,6 @@ public class Proj3 {
                                                                                  // ratio
         HashMap<String, Integer> hmWaitTimes = new HashMap<String, Integer>(); // Hash map to store job, wait time
 
-        HashMap<String, Integer> correctedStartTime = new HashMap<String, Integer>();
         int startTime = 0;
         int finishTime = 0;
         String job = "";
@@ -163,55 +165,60 @@ public class Proj3 {
         int indexJob = 0;
         boolean jobsSelected = false;
 
-        // store job, duration in hashmap for easy retrieval at the end
+        // store job, start time in hashmap and job, duration time for easy retrieval at
+        // the end
         for (int i = 0; i < arrJobs.size(); i++) {
             hmDuration.put(arrJobs.get(i), arrDuration.get(i));
             hmStartTime.put(arrJobs.get(i), arrStartTime.get(i));
         }
 
-        String maxJob = null;
+        String maxRatioJob = null;
 
         // Iterate through jobs
         while (arrJobs.size() > indexJob) {
             // while jobs are selected go into loop else set jobsSelected to false
             while (jobsSelected) {
-                // get minimum duration job if start time of previous job < next job star time
                 if (startTime <= arrStartTime.get(indexJob)) {
-                    // fill wait time hashmap
+                    // From picked jobs, calculate wait time to put in wait time hashmap with job
                     for (Map.Entry<String, Integer> entry : hmPickedJobs.entrySet()) {
                         job = entry.getKey();
                         startForJob = hmStartTime.get(job);
                         hmWaitTimes.put(job, startTime - startForJob);
                     }
 
-                    // loop through picked jobs and calculate then insert ratio into responseratio
+                    // loop through picked jobs and calculate then insert ratio into response ratio
                     // map
                     for (Map.Entry<String, Integer> jobEntry : hmPickedJobs.entrySet()) {
                         String jobForRR = jobEntry.getKey();
                         int wait = hmWaitTimes.get(jobForRR);
                         int duration = hmPickedJobs.get(jobForRR);
+                        // calculate response ratio
                         double respRatio = (double) (wait + duration) / duration;
+                        // add job and response ratio to map
                         hmResponseRatio.put(jobForRR, respRatio);
                     }
 
                     // get max job response ratio value and assign to string to find job key
                     Double maxValueInMap = (Collections.max(hmResponseRatio.values()));
-                    for (Map.Entry<String, Double> entryMax : hmResponseRatio.entrySet()) { // Itrate
-                        // through hashmap
+                    for (Map.Entry<String, Double> entryMax : hmResponseRatio.entrySet()) {
+                        // maxRatioJob holds max job response ratio key
                         if ((entryMax.getValue()) == maxValueInMap) {
-                            maxJob = entryMax.getKey();
+                            maxRatioJob = entryMax.getKey();
                         }
                     }
 
-                    hmWaitTimes.remove(maxJob);
-                    hmResponseRatio.remove(maxJob);
-                    hmStartTime.put(maxJob, startTime);
+                    // remove max ratio response job from hashmaps
+                    hmWaitTimes.remove(maxRatioJob);
+                    hmResponseRatio.remove(maxRatioJob);
+                    hmStartTime.put(maxRatioJob, startTime);
 
-                    finishTime = startTime + hmPickedJobs.get(maxJob);
+                    // set finish time to start time plus duration of picked jobs ( stored in
+                    // hmPicked Jobs )
+                    finishTime = startTime + hmPickedJobs.get(maxRatioJob);
 
                     // set start time of now new job to finish time of last job
                     startTime = finishTime;
-                    hmPickedJobs.remove(maxJob);
+                    hmPickedJobs.remove(maxRatioJob);
 
                 } else {
                     jobsSelected = false;
@@ -226,13 +233,11 @@ public class Proj3 {
         }
 
         while (hmPickedJobs.size() > 0) {
-            // fill wait time hashmap
             for (Map.Entry<String, Integer> entry : hmPickedJobs.entrySet()) {
                 job = entry.getKey();
                 startForJob = hmStartTime.get(job);
                 hmWaitTimes.put(job, startTime - startForJob);
             }
-
             for (Map.Entry<String, Integer> jobEntry2 : hmPickedJobs.entrySet()) {
                 String jobForRR = jobEntry2.getKey();
                 int wait = hmWaitTimes.get(jobForRR);
@@ -240,25 +245,23 @@ public class Proj3 {
                 double respRatio = (double) (wait + duration) / duration;
                 hmResponseRatio.put(jobForRR, respRatio);
             }
-
-            // get max job ratio value and assign to string to find job key
             Double maxValueInMap = (Collections.max(hmResponseRatio.values()));
-            for (Map.Entry<String, Double> entryMax : hmResponseRatio.entrySet()) { // Itrate
-                // through hashmap
+            for (Map.Entry<String, Double> entryMax : hmResponseRatio.entrySet()) {
                 if ((entryMax.getValue()) == maxValueInMap) {
-                    maxJob = entryMax.getKey();
+                    maxRatioJob = entryMax.getKey();
                 }
             }
 
-            hmWaitTimes.remove(maxJob);
-            hmResponseRatio.remove(maxJob);
-            hmStartTime.put(maxJob, startTime);
-            finishTime = startTime + hmPickedJobs.get(maxJob);
+            hmWaitTimes.remove(maxRatioJob);
+            hmResponseRatio.remove(maxRatioJob);
+            hmStartTime.put(maxRatioJob, startTime);
+            finishTime = startTime + hmPickedJobs.get(maxRatioJob);
             // set start time of now new job to finish time of last job
             startTime = finishTime;
-            hmPickedJobs.remove(maxJob);
+            hmPickedJobs.remove(maxRatioJob);
 
         }
+        // Print out HRRN
         System.out.println("\nHRRN :\n");
         for (int i = 0; i < arrJobs.size(); i++) {
             printProcess(arrJobs.get(i), hmStartTime.get(arrJobs.get(i)),
@@ -266,9 +269,8 @@ public class Proj3 {
         }
     }
 
+    // Print Process function
     public static void printProcess(String jobString, int arrival, int finish) {
-        // System.out.println("Print job: " + jobString + " arrival: " + arrival + "
-        // finish: " + finish);
 
         System.out.print(jobString);
         String line = " ";
